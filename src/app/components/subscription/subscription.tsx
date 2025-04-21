@@ -20,6 +20,7 @@ export const Subscription: React.FC = () => {
     }
     const params = await compressToBase64(configString);
     const url = new URL(`/ics/${encodeURIComponent(params)}`, window.location.origin);
+    localStorage.setItem('icsUrl', url.toString());
     return url.toString();
   });
 

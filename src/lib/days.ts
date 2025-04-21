@@ -1,19 +1,8 @@
-import dayjs from 'dayjs';
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
-import { PluginLunar } from "dayjs-plugin-lunar";
+import { dayjs } from '@/lib/dayjs';
 import handlebars from 'handlebars';
 
-dayjs.extend(utc);
-dayjs.extend(timezone);
-dayjs.extend(PluginLunar);
-
-dayjs.tz.setDefault('Asia/Shanghai');
-
-export { dayjs };
-
 export const fetchAnniversary = async (startDate: Date, titleTemplate: string) => {
-  const startDay = dayjs(startDate);
+  const startDay = dayjs.tz(startDate, process.env.NEXT_PUBLIC_TZ);
   const compileTitle = handlebars.compile(titleTemplate);
   const lunarStartYear = startDay.toLunarYear().getYear();
 

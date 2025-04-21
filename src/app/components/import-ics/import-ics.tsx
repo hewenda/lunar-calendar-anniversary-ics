@@ -1,12 +1,35 @@
 'use client';
 import { decompressFromBase64 } from '@/lib/compress';
 import { Button, Form, Modal, useFormApi } from '@douyinfe/semi-ui';
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export const ImportIcs: React.FC = () => {
   const formRef = useRef<Form>(null);
 
   const globalFormApi = useFormApi();
+
+  const submit = useCallback(async (values: any) => {
+    const url = new URL(values.url);
+    const data = url.pathname.replace('/ics/', '');
+    const jsonString = await decompressFromBase64(decodeURIComponent(data));
+    const params = JSON.parse(jsonString);
+
+    globalFormApi.setValues(
+      {
+        days: params.map((item: string[]) => {
+          const [day, temp] = item;
+          return { day, temp };
+        }),
+      },
+      { isOverride: true }
+    );
+  }, []);
+
+  useEffect(() => {
+    if (localStorage.getItem('icsUrl')) {
+      submit({ url: localStorage.getItem('icsUrl') });
+    }
+  }, []);
 
   const [visible, setVisible] = useState(false);
   return (
@@ -25,19 +48,7 @@ export const ImportIcs: React.FC = () => {
         <Form
           ref={formRef}
           onSubmit={async (values) => {
-            const url = new URL(values.url);
-            const data = url.pathname.replace('/ics/', '');
-            const jsonString = await decompressFromBase64(decodeURIComponent(data));
-            const params = JSON.parse(jsonString);
-            globalFormApi.setValues(
-              {
-                days: params.map((item: string[]) => {
-                  const [day, temp] = item;
-                  return { day, temp };
-                }),
-              },
-              { isOverride: true }
-            );
+            await submit(values);
             setVisible(false);
           }}
         >
