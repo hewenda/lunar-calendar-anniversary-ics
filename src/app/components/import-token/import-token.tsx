@@ -1,37 +1,40 @@
 "use client";
-import { decompressFromBase64 } from "@/lib/compress";
 import { Button, Form, Modal, useFormApi } from "@douyinfe/semi-ui";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-export const ImportIcs: React.FC = () => {
+export const ImportToken: React.FC = () => {
   const formRef = useRef<Form>(null);
 
   const globalFormApi = useFormApi();
 
   const submit = useCallback(async (values: any) => {
-    const url = new URL(values.url);
-    const data = url.pathname.replace("/ics/", "");
-    const jsonString = await decompressFromBase64(decodeURIComponent(data));
-    const params = JSON.parse(jsonString);
+    const token = values.token;
+    const resp = await fetch(`/api/token?token=${token}`).then((res) =>
+      res.json()
+    );
 
     globalFormApi.setValues(
       {
-        days: params.map((item: string[]) => {
-          const [day, temp] = item;
-          return { day, temp };
-        }),
+        token,
+        days: resp?.data ?? [],
       },
       { isOverride: true }
     );
   }, []);
 
+  useEffect(() => {
+    if (localStorage.getItem("data-token")) {
+      submit({ token: localStorage.getItem("data-token") });
+    }
+  }, []);
+
   const [visible, setVisible] = useState(false);
   return (
     <>
-      <Button onClick={() => setVisible(true)}>导入链接</Button>
+      <Button onClick={() => setVisible(true)}>导入Token</Button>
 
       <Modal
-        title="导入链接"
+        title="导入Token"
         visible={visible}
         onOk={() => formRef.current?.formApi.submitForm()}
         onCancel={() => {
@@ -47,21 +50,20 @@ export const ImportIcs: React.FC = () => {
           }}
         >
           <Form.Input
-            label="链接"
-            field="url"
+            label="Token"
+            field="token"
             noLabel
-            placeholder="请输入订阅链接"
+            placeholder="请输入Token"
             rules={[
               {
                 validator: (_, value) => {
                   try {
-                    const url = new URL(value);
-                    if (url.pathname.startsWith("/ics/")) {
+                    if (value) {
                       return true;
                     }
                     throw new Error();
                   } catch (error) {
-                    return new Error("请输入正确的订阅链接");
+                    return new Error("请输入正确的Token");
                   }
                 },
               },

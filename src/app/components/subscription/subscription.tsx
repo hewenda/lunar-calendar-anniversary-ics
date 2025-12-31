@@ -1,35 +1,40 @@
-import { useFormDays } from '@/app/hooks/use-form-days';
-import { compressToBase64 } from '@/lib/compress';
-import { Form, TextArea } from '@douyinfe/semi-ui';
-import { useMemo } from 'react';
-import useSWR from 'swr';
+import { useFormDays } from "@/app/hooks/use-form-days";
+import {
+  Form,
+  TextArea,
+  Input,
+  Row,
+} from "@douyinfe/semi-ui";
+import { useMemo } from "react";
 
 export const Subscription: React.FC = () => {
-  const { days } = useFormDays();
+  const { token, days } = useFormDays();
 
   const configStr = useMemo(() => {
     if (!days?.length) {
-      return null;
+      return "";
     }
-    return JSON.stringify(days.map((item) => [item.day, item.temp]));
+    return JSON.stringify(days);
   }, [days]);
 
-  const { data: icsUrl } = useSWR(['config', configStr], async ([_, configString]) => {
-    if (!configString) {
-      return null;
+  const tokenUrl = useMemo(() => {
+    if (!token) {
+      return "";
     }
-    const params = await compressToBase64(configString);
-    const url = new URL(`/ics/${encodeURIComponent(params)}`, window.location.origin);
-    localStorage.setItem('icsUrl', url.toString());
-    return url.toString();
-  });
 
-  if (!icsUrl) {
-    return null;
-  }
+    return new URL(`/token/${token}`, window.location.origin).toString();
+  }, [token]);
+
   return (
-    <Form.Slot label='订阅地址'>
-      <TextArea value={icsUrl} />
-    </Form.Slot>
+    <Row style={{ marginTop: 10 }}>
+      {token && (
+        <Form.Slot label="Token">
+          <Input value={tokenUrl} />
+        </Form.Slot>
+      )}
+      <Form.Slot label="配置信息">
+        <TextArea value={configStr} />
+      </Form.Slot>
+    </Row>
   );
 };

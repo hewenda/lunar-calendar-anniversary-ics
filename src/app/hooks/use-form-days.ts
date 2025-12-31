@@ -1,7 +1,8 @@
-import { useFormState } from '@douyinfe/semi-ui';
-import { useMemo } from 'react';
+import { useFormState } from "@douyinfe/semi-ui";
+import { useMemo } from "react";
 
 export type FormType = {
+  token: string;
   days: {
     day: Date;
     temp: string;
@@ -11,9 +12,13 @@ export type FormType = {
 export function useFormDays() {
   const formState = useFormState<FormType>();
 
-  const daysStr = JSON.stringify(formState.values?.days?.filter((item) => item.day && item.temp) ?? []);
+  const daysStr = JSON.stringify(
+    formState.values?.days?.filter((item) => item.day && item.temp) ?? []
+  );
 
-  const days = useMemo<FormType['days']>(() => JSON.parse(daysStr), [daysStr]);
+  const token = formState.values?.token;
+  const days = useMemo<FormType["days"]>(() => JSON.parse(daysStr), [daysStr]);
 
-  return { days };
+  return { token, days };
 }
+
