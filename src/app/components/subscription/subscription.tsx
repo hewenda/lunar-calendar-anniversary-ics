@@ -22,7 +22,7 @@ export const Subscription: React.FC = () => {
       return "";
     }
 
-    return new URL(`/token/${token}`, window.location.origin).toString();
+    return new URL(`/ics-token/${token}`, window.location.origin).toString();
   }, [token]);
 
   return (

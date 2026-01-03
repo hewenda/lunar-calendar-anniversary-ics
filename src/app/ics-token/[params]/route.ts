@@ -49,5 +49,6 @@ export async function GET(request: NextRequest, context: { params: Params }) {
 
   const headers = new Headers();
   headers.set("etag", etag);
+  headers.set("content-type", "text/calendar; charset=utf-8");
   return new Response(value, { headers });
 }
